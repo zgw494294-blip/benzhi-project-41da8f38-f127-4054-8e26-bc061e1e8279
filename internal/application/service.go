@@ -7,6 +7,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"strings"
+	"sync"
 	"time"
 
 	"benzhi-project-41da8f38-f127-4054-8e26-bc061e1e8279/internal/domain"
@@ -14,12 +15,18 @@ import (
 )
 
 type Service struct {
-	repo  Repository
-	clock func() time.Time
+	repo           Repository
+	clock          func() time.Time
+	preflightMu    sync.RWMutex
+	preflightByJob map[string]RevisionPreflight
 }
 
 func NewService(repo Repository) *Service {
-	return &Service{repo: repo, clock: func() time.Time { return time.Now().UTC() }}
+	return &Service{
+		repo:           repo,
+		clock:          func() time.Time { return time.Now().UTC() },
+		preflightByJob: make(map[string]RevisionPreflight),
+	}
 }
 
 func newID(prefix string) string {

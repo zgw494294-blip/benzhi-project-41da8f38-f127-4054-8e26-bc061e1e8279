@@ -151,6 +151,13 @@ func summarize(a, b []domain.Segment) ChangeSummary {
 }
 
 func (s *Service) PreflightRevision(ctx context.Context, cmd SubmitRevisionCommand) (RevisionPreflight, error) {
+	s.preflightMu.RLock()
+	cached, ok := s.preflightByJob[cmd.JobID]
+	s.preflightMu.RUnlock()
+	if ok {
+		return cached, nil
+	}
+
 	var out RevisionPreflight
 	err := s.repo.Transact(ctx, func(tx Tx) error {
 		job, e := tx.GetJob(cmd.JobID)
@@ -186,6 +193,11 @@ func (s *Service) PreflightRevision(ctx context.Context, cmd SubmitRevisionComma
 		out = RevisionPreflight{JobID: job.ID, ParentRevisionID: cmd.ParentRevisionID, ContentDigest: digest, ExpectedVersion: job.Version, Sequence: seq, Summary: summarize(parent, cmd.Segments)}
 		return nil
 	})
+	if err == nil {
+		s.preflightMu.Lock()
+		s.preflightByJob[cmd.JobID] = out
+		s.preflightMu.Unlock()
+	}
 	return out, err
 }
 
