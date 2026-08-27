@@ -1,0 +1,52 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>无障碍字幕审校台</title>
+  <link rel="stylesheet" href="/assets/app.css">
+</head>
+<body>
+  <header class="topbar">
+    <div><p class="eyebrow">公共文化 · 发布质量</p><h1>无障碍字幕审校台</h1></div>
+    <div id="connection" class="status-pill">正在连接</div>
+  </header>
+  <main>
+    <aside class="sidebar" aria-label="字幕任务">
+      <div class="section-title"><h2>任务</h2><button id="refreshJobs" class="quiet">刷新</button></div>
+      <div class="pair"><label>关键词<input id="jobKeyword" placeholder="片名或媒体引用"></label><label>状态<select id="jobStatusFilter"><option value="">全部状态</option><option value="draft">草稿</option><option value="remediating">整改中</option><option value="review_ready">待复核</option><option value="approved">已通过</option><option value="frozen">已冻结</option></select></label></div>
+      <div class="pair"><label>规范<input id="jobProfileFilter"></label><label>源语言<input id="jobSourceFilter"></label></div><label>目标语言<input id="jobTargetFilter"></label>
+      <div id="jobList" class="job-list"></div>
+      <form id="jobForm" class="card form-stack">
+        <h3>建立字幕任务</h3>
+        <label>片名<input name="title" required value="公共文化节目"></label>
+        <label>媒体引用<input name="mediaRef" required value="media://catalog/program-001"></label>
+        <div class="pair"><label>时长（毫秒）<input name="durationMillis" type="number" min="1" value="120000" required></label><label>发布规范<input name="profileCode" value="PUBLIC-CULTURE-V1" required></label></div>
+        <div class="pair"><label>源语言<input name="sourceLanguage" value="zh-CN" required></label><label>目标语言<input name="targetLanguage" value="zh-CN" required></label></div>
+        <label>建档人<input name="actorID" value="editor-01" required></label>
+        <button>创建任务</button>
+      </form>
+    </aside>
+    <section class="workspace">
+      <div id="emptyState" class="empty"><strong>选择或创建任务</strong><span>工作台将在此展示修订、问题、复核和发布证据。</span></div>
+      <div id="workbench" hidden>
+        <section class="hero card"><div><p id="jobMeta" class="eyebrow"></p><h2 id="jobTitle"></h2><p id="jobRef" class="muted"></p></div><div><span id="jobStatus" class="status-pill"></span><p id="jobVersion" class="mono"></p></div></section>
+        <nav class="tabs" aria-label="工作区视图"><button data-tab="timeline" class="active">时间轴与修订</button><button data-tab="findings">质量问题</button><button data-tab="review">独立复核</button><button data-tab="release">冻结与验证</button><button data-tab="audit">审计轨迹</button></nav>
+        <section id="timeline" class="tab-panel">
+          <div class="grid-two"><form id="revisionForm" class="card form-stack"><h3>提交不可变修订</h3><label>作者<input name="authorID" value="editor-01" required></label><label>变更说明<input name="changeNote" value="首个时间轴版本" required></label><label>字幕片段 JSON<textarea name="segments" rows="12" required>[
+  {"id":"s1","startMillis":0,"endMillis":1800,"speaker":"环境声","text":"[音乐]"},
+  {"id":"s2","startMillis":2000,"endMillis":5000,"speaker":"主持人","text":"欢迎收看公共文化节目。"}
+]</textarea></label><button>提交修订</button></form><div class="card"><div class="section-title"><h3>时间轴预览</h3><button id="runQuality">运行检查</button></div><div id="timelineList" class="timeline"></div></div></div>
+          <div class="card"><div class="section-title"><h3>修订差异</h3><button id="loadDiff" class="quiet">对比最近两版</button></div><div id="diffView" class="muted">至少提交两个修订后可对比文本、时间码和问题数量。</div></div>
+        </section>
+        <section id="findings" class="tab-panel" hidden><div class="card"><h3>问题处置表</h3><p class="muted">每项处置必须填写依据。阻断项保持待修复时，需要提交继任修订并重新检查。</p><div id="findingList"></div></div></section>
+        <section id="review" class="tab-panel" hidden><form id="reviewForm" class="card form-stack"><h3>独立复核</h3><label>审核员（不得为本次修订作者）<input name="reviewerID" value="reviewer-02" required></label><label>抽检片段 ID（逗号分隔）<input name="sampledSegmentIDs" value="s1,s2" required></label><label>复核意见<textarea name="comment" required>已抽检时间码、声音提示和文本准确性。</textarea></label><label>决定<select name="decision"><option value="approve">通过</option><option value="reject">退回整改</option></select></label><button>提交不可覆盖的复核决定</button></form></section>
+        <section id="release" class="tab-panel" hidden><div class="grid-two"><form id="freezeForm" class="card form-stack"><h3>冻结获批修订</h3><label>发布负责人<input name="actorID" value="publisher-01" required></label><button>冻结并签发凭据</button></form><div class="card"><div class="section-title"><h3>发布凭据</h3><button id="verifyRelease" class="quiet">重新计算并验证</button></div><div id="releaseView" class="muted">冻结后显示摘要、凭据和下载入口。</div></div></div></section>
+        <section id="audit" class="tab-panel" hidden><div class="card"><div class="section-title"><h3>完整审计轨迹</h3><button id="loadAudit" class="quiet">刷新轨迹</button></div><ol id="auditList" class="audit-list"></ol></div></section>
+      </div>
+    </section>
+  </main>
+  <div id="toast" class="toast" role="status" aria-live="polite"></div>
+  <script src="/assets/app.js" defer></script>
+</body>
+</html>
